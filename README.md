@@ -1,14 +1,13 @@
-# sttui
- ## Speech To Text Terminal User Interface
- ## prounounced like STEWIE
+# sttui: Speech To Text Terminal User Interface
+
+> **v0.1.0** | Shell, Python 3.10+ | MIT License
 
 A local, fully offline speech-to-text tool powered by [faster-whisper](https://github.com/SYSTRAN/faster-whisper). Record audio with a global hotkey from any window, transcribe it on-device, and get the result copied straight to your clipboard — no cloud, no API keys, no latency.
 
 Comes with a polished terminal UI built on [Textual](https://github.com/Textualize/textual), complete with a live audio level meter, transcription history, and on-the-fly model switching.
 
-<!-- Replace with actual screenshot -->
 <p align="center">
-  <img src="screenshot.png" alt="sttui in action" width="700">
+  <img src="demo.gif" alt="sttui in action" width="700">
 </p>
 
 ---
@@ -27,8 +26,8 @@ Comes with a polished terminal UI built on [Textual](https://github.com/Textuali
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-username/fasterwhisper-speech-to-text-tui.git
-cd fasterwhisper-speech-to-text-tui
+git clone https://github.com/your-username/sttui.git
+cd sttui
 chmod +x install.sh run.sh
 ./install.sh
 ./run.sh
@@ -82,7 +81,7 @@ Minimal output, no UI — just hotkeys and clipboard.
 Record, transcribe, print to stdout, and exit. No hotkeys or UI — ideal for scripts and piping.
 
 ```bash
-# Record until Enter is pressed
+# Record until crtl+shift+space is pressed
 ./run.sh --headless
 
 # Record for exactly 10 seconds
@@ -102,6 +101,7 @@ Status messages go to stderr, transcription goes to stdout.
 | `--headless` | Record, transcribe, print to stdout, and exit | off |
 | `--duration` | Recording duration in seconds (headless mode; omit to wait for Enter) | — |
 | `--model` | Whisper model size | `base` |
+| `--version` | Print version and exit | — |
 
 ```bash
 # Example: launch with the small model
@@ -147,3 +147,7 @@ All transcriptions are automatically saved to `transcription_log.txt` with times
 ## License
 
 MIT
+
+## Author
+
+Anthony Holten @aholten on GitHub
