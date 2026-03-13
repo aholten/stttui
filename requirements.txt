@@ -1,0 +1,8 @@
+faster-whisper
+sounddevice
+soundfile
+pynput
+pyperclip
+numpy
+tzdata
+textual

@@ -1,0 +1,21 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Whisper model cache
+*.bin
+*.pt
+
+# Logs
+transcription_log.txt
+
+# OS
+.DS_Store
+Thumbs.db
