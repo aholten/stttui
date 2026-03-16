@@ -29,14 +29,13 @@ import soundfile as sf
 from faster_whisper import WhisperModel
 from pynput import keyboard as pynput_keyboard
 
-_SCRIPT_DIR = Path(__file__).resolve().parent
-VERSION = (_SCRIPT_DIR / "VERSION").read_text().strip()
+from stttui import __version__ as VERSION
 
 HOTKEY_RECORD = "ctrl+shift+space"
 HOTKEY_QUIT = "ctrl+c"
 SAMPLE_RATE = 16000
 CHANNELS = 1
-LOG_FILE = _SCRIPT_DIR / "transcription_log.txt"
+LOG_FILE = Path.home() / ".stttui" / "transcription_log.txt"
 EASTERN = ZoneInfo("America/New_York")
 MODEL_SIZES = ["tiny", "base", "small", "medium", "large"]
 
@@ -141,6 +140,7 @@ class SpeechToText:
     def _log_transcription(self, text, timestamp=None):
         if timestamp is None:
             timestamp = datetime.now(EASTERN).strftime("%Y-%m-%d %I:%M:%S %p %Z")
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {text}\n")
 
