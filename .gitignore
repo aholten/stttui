@@ -8,6 +8,8 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+*.whl
+*.tar.gz
 
 # Whisper model cache
 *.bin
