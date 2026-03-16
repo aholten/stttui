@@ -38,9 +38,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/aholten/sttui"
-Repository = "https://github.com/aholten/sttui"
-Issues = "https://github.com/aholten/sttui/issues"
+Homepage = "https://github.com/aholten/stttui"
+Repository = "https://github.com/aholten/stttui"
+Issues = "https://github.com/aholten/stttui/issues"
 
 [project.scripts]
 stttui = "stttui.speech_to_text:main"
