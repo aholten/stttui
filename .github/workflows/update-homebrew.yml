@@ -6,14 +6,24 @@ on:
     types: [completed]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update-formula:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: aholten/homebrew-tap
+          token: ${{ secrets.TAP_PUSH_TOKEN }}
+          path: tap
+
+      - name: Checkout stttui (for pyproject.toml)
+        uses: actions/checkout@v4
+        with:
+          path: src
 
       - uses: actions/setup-python@v5
         with:
@@ -22,9 +32,9 @@ jobs:
       - name: Install tools
         run: pip install homebrew-pypi-poet
 
-      - name: Wait for PyPI availability
+      - name: Resolve version and wait for PyPI availability
         run: |
-          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('src/pyproject.toml','rb'))['project']['version'])")
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           for i in {1..30}; do
             if pip install "stttui==$VERSION" --dry-run 2>/dev/null; then
@@ -44,59 +54,47 @@ jobs:
       - name: Update formula
         run: |
           python - <<'SCRIPT'
-          import re, subprocess, hashlib, urllib.request, os
+          import re, hashlib, urllib.request, os
 
           version = os.environ["VERSION"]
 
-          # Get sdist URL and SHA256
           url = f"https://files.pythonhosted.org/packages/source/s/stttui/stttui-{version}.tar.gz"
           sha256 = hashlib.sha256(urllib.request.urlopen(url).read()).hexdigest()
 
-          # Read resource stanzas (skip the stttui entry itself)
           with open("resources.txt") as f:
               resources_raw = f.read()
 
-          # Remove the stttui resource block (it's the main package, not a dep)
+          # Drop the stttui self-resource — it's the main package, not a dep.
           resources = re.sub(
               r'  resource "stttui" do\n.*?\n.*?\n  end\n\n?',
               '',
               resources_raw,
-              flags=re.DOTALL
+              flags=re.DOTALL,
           )
 
-          with open("Formula/stttui.rb") as f:
+          formula_path = "tap/Formula/stttui.rb"
+          with open(formula_path) as f:
               formula = f.read()
 
-          # Update url
-          formula = re.sub(
-              r'url ".*?"',
-              f'url "{url}"',
-              formula
-          )
-          # Update sha256 (first occurrence, the main one)
-          formula = re.sub(
-              r'sha256 "[a-f0-9]+"',
-              f'sha256 "{sha256}"',
-              formula,
-              count=1
-          )
-          # Update resources block
+          formula = re.sub(r'url ".*?"', f'url "{url}"', formula)
+          formula = re.sub(r'sha256 "[a-f0-9]+"', f'sha256 "{sha256}"', formula, count=1)
           formula = re.sub(
               r'(# --- auto-generated resources ---\n).*?(  # --- end resources ---)',
               r'\1' + resources + r'  \2',
               formula,
-              flags=re.DOTALL
+              flags=re.DOTALL,
           )
 
-          with open("Formula/stttui.rb", "w") as f:
+          with open(formula_path, "w") as f:
               f.write(formula)
           SCRIPT
 
-      - name: Commit updated formula
+      - name: Commit and push updated formula
+        working-directory: tap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/stttui.rb
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "formula: update stttui to $VERSION"
+          git commit -m "stttui: update to $VERSION"
           git push
